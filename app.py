@@ -35,6 +35,7 @@ def create_app():
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
     app.config['JWT_BLACKLIST_ENABLED'] = True
     app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
+    app.config['JWT_ERROR_MESSAGE_KEY'] = 'msg'
 
     # Initialize extensions
     CORS(app)
@@ -59,7 +60,6 @@ def create_app():
 
     # Initialize app context and create database tables
     with app.app_context():
-        import models  # noqa: F401
         db.create_all()
 
     return app

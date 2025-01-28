@@ -15,18 +15,21 @@ def jwt_required_custom(fn):
         try:
             verify_jwt_in_request()
             jwt = get_jwt()
+            if jwt.get('type') != 'access':
+                return jsonify({"msg": "Only access tokens are allowed"}), 401
             # Check if token is in blacklist
-            if 'jti' in jwt:
-                token = RefreshToken.query.filter_by(token=jwt['jti'], revoked=True).first()
-                if token:
-                    return jsonify({"msg": "Token has been revoked"}), 401
+            if 'jti' in jwt and RefreshToken.query.filter_by(token=jwt['jti'], revoked=True).first():
+                return jsonify({"msg": "Token has been revoked"}), 401
             return fn(*args, **kwargs)
         except Exception as e:
-            return jsonify({"msg": "Invalid token"}), 401
+            return jsonify({"msg": str(e)}), 401
     return wrapper
 
 def get_current_user():
-    return get_jwt_identity()
+    try:
+        return get_jwt_identity()
+    except:
+        return None
 
 def create_tokens(user_id):
     """Create both access and refresh tokens."""
