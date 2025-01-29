@@ -29,12 +29,18 @@ git clone <repository-url>
 cd <repository-name>
 ```
 
-2. Install dependencies
+2. Create and activate a virtual environment (recommended)
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+```
+
+3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Set up environment variables
+4. Set up environment variables
 ```bash
 export FLASK_SECRET_KEY=your_secret_key
 export DATABASE_URL=your_database_url
@@ -42,7 +48,7 @@ export JWT_SECRET_KEY=your_jwt_secret
 export REDIS_URL=your_redis_url  # Optional, defaults to localhost
 ```
 
-4. Run the application
+5. Run the application
 ```bash
 python main.py
 ```
