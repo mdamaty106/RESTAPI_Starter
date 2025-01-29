@@ -9,6 +9,7 @@ from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from middleware.error_handler import register_error_handlers
+from redis import Redis
 
 class Base(DeclarativeBase):
     pass
@@ -16,8 +17,12 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 ma = Marshmallow()
 jwt = JWTManager()
+
+# Configure Redis for rate limiting
+redis_client = Redis.from_url(os.environ.get('REDIS_URL', 'redis://localhost:6379'))
 limiter = Limiter(
     key_func=get_remote_address,
+    storage_uri="memory://",
     default_limits=["200 per day", "50 per hour"]
 )
 
@@ -27,6 +32,9 @@ def create_app():
     # Configuration
     app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev_secret_key')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+    if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
+        app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_pre_ping': True,
